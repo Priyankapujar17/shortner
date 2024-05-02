@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener</title>
+</head>
+<body>
+    <h1>URL Shortener</h1>
+
+    <div id="url-shortener">
+        <h2>Shorten URL</h2>
+        <form id="url-form">
+            <label for="long-url">Enter a long URL:</label><br>
+            <input type="text" id="long-url" name="long-url" required><br>
+            <button type="submit">Shorten URL</button>
+        </form>
+        <p>Shortened URL: <span id="shortened-url"></span></p>
+    </div>
+
+    <div id="url-decoder">
+        <h2>Decode Shortened URL</h2>
+        <label for="short-url">Enter the shortened URL:</label><br>
+        <input type="text" id="short-url" name="short-url" required>
+        <button onclick="getOriginalURL()">Get Original URL</button>
+        <p>Original URL: <span id="original-url"></span></p>
+    </div>
+
+    <script>
+        class URLShortener {
+            constructor() {
+                this.urlMap = new Map();
+                this.alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                this.base = this.alphabet.length;
+                this.shortUrlLength = 6;
+            }
+
+            generateShortURL() {
+                let shortURL = '';
+                for (let i = 0; i < this.shortUrlLength; i++) {
+                    const randomIndex = Math.floor(Math.random() * this.base);
+                    shortURL += this.alphabet[randomIndex];
+                }
+                return shortURL;
+            }
+
+            encodeURL(longURL) {
+                let shortURL;
+                do {
+                    shortURL = this.generateShortURL();
+                } while (this.urlMap.has(shortURL));
+
+                this.urlMap.set(shortURL, longURL);
+                return shortURL;
+            }
+
+            decodeURL(shortURL) {
+                const shortCode = shortURL.substring(shortURL.lastIndexOf('/') + 1);
+                if (this.urlMap.has(shortCode)) {
+                    return this.urlMap.get(shortCode);
+                } else {
+                    return "Short URL not found";
+                }
+            }
+        }
+
+        const shortener = new URLShortener();
+
+        // Function to handle form submission
+        document.getElementById('url-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const longURLInput = document.getElementById('long-url').value;
+            const shortenedURL = shortener.encodeURL(longURLInput);
+            document.getElementById('shortened-url').innerText = window.location.href + shortenedURL;
+        });
+
+        // Function to decode the shortened URL and display the original URL
+        function getOriginalURL() {
+            const shortURLInput = document.getElementById('short-url').value;
+            const originalURL = shortener.decodeURL(shortURLInput);
+            document.getElementById('original-url').innerText = originalURL;
+        }
+    </script>
+</body>
+</html>
